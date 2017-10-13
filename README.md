@@ -56,7 +56,23 @@ Finally, `git commit -m "Initial commit"`.
 
 `docker-mysql-import [CONTAINER] [DUMP_FILENAME]`
 
+# Why should I version my Wordpress site? We collaborate on a staging website (dev.example.com).
+
+Yes, it is viable to collaborate and develop on a staging environment.
+Consider the advantages of this scheme over a staging environment.
+
+1. Development locally
+2. Development offline
+3. Cheaper, since you would not need a staging server
+4. Version control benefits, reverting commits [(negates with VersionPress plugin)](https://versionpress.net)
+
+However, it does come with a staggering disadvantage. Resolving merge conflicts
+between two Wordpress SQL dumps is nasty because of the auto-increment flag.
+When using this scheme, you must treat the database dump with a pessimistic lock.
+In other words, two developers cannot develop concurrently.
+
 ## Compatibility Notes
 
 * Mac `sed` is inconsistent with GNU `sed`
+
   * [Fix with `brew install gnu-sed --with-default-names`](https://superuser.com/a/582558/558061)
