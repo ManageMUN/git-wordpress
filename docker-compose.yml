@@ -1,0 +1,28 @@
+version: '3'
+
+services:
+  my-wordpress:
+    image: wordpress
+    volumes:
+      - .:/var/www/html
+    links:
+      - my-mysql
+    ports:
+      - 80:80
+    command: >
+               /bin/bash -c "
+               chown -R 1000:1000 /var/www/html &&
+               usermod -u 1000 www-data &&
+               docker-entrypoint.sh apache2-foreground"
+
+  my-mysql:
+    image: mysql
+    volumes:
+      - my-mysql-volume:/var/lib/mysql
+      - .:/app
+    working_dir: /app
+    env_file:
+      - environment.env
+
+volumes:
+  my-mysql-volume:

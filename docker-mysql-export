@@ -1,0 +1,34 @@
+#!/bin/bash
+
+# https://stackoverflow.com/a/246128/5153138
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+source "$DIR/environment.env"
+
+DEFAULT_CONTAINER="$(docker ps -f name=$DOCKER_IMAGE_MYSQL --format={{.ID}})"
+
+CONTAINER=${1:-$DEFAULT_CONTAINER}
+
+DUMP_FILENAME=${2:-$DEFAULT_DUMP_FILENAME}
+
+if [[ ${#CONTAINER} == 0 ]]; then
+    (>&2 echo "No MySQL docker containers are running.
+Perhaps you forgot to run \`docker-compose up\`?")
+    exit 1
+elif [[ ${#DEFAULT_CONTAINER} > 12 ]]; then
+    (>&2 echo "More than one MySQL docker containers are running.
+Specify which container you want to export from \`docker-mysql-export ##########\`.
+
+$(docker ps -f name=$DOCKER_IMAGE_MYSQL)")
+    exit 1
+fi
+
+docker exec $CONTAINER \
+    "mysqldump" \
+    "-u$MYSQL_USER" \
+    "-p$MYSQL_PASSWORD" \
+    "$MYSQL_DATABASE" \
+    "--skip-comments" \
+    "--skip-extended-insert" | \
+
+sed "s\$${DEVELOPMENT_DOMAIN}\$${PRODUCTION_DOMAIN}\$g" 1> "$DIR/$DUMP_FILENAME"
